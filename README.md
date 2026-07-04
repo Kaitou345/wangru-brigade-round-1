@@ -1,72 +1,99 @@
 # Smart Office Energy Monitoring System
 
 <p align="center">
-  <img src="./architecture.png" alt="System Architecture" width="850">
+  <img src="./architecture.png" alt="System Architecture" width="900">
 </p>
 
 A real-time Smart Office Energy Monitoring System built for the **IUT Hackathon**.
 
-The system simulates an office environment containing multiple rooms and electrical appliances, continuously tracks their states, provides a live monitoring dashboard, responds to Discord commands using an LLM, and proactively notifies users when devices remain active after office hours.
+The project simulates an office environment, monitors electrical devices in real time, visualizes the office through a live dashboard, allows interaction through a Discord bot powered by Google's Gemini API, and proactively notifies users when devices remain active after office hours.
 
 ---
 
-## Features
+# Features
 
-- 🏢 Simulated office environment
-- ⚡ Real-time device state updates
-- 📊 Live React dashboard
-- 🤖 Discord bot with natural language responses
-- 🧠 Gemini-powered office assistant
-- 🔔 Automatic after-hours alerts
-- 🔌 REST API
+- 🏢 Office simulator with virtual office clock
+- ⚡ Live energy monitoring
+- 📊 React + Tailwind dashboard
+- 🤖 Discord bot assistant
+- 🧠 Google Gemini powered summaries
+- 🔔 Automatic after-hours Discord alerts
 - 📡 Socket.IO real-time communication
+- 🌐 REST API
+- 🏠 Room-wise power monitoring
 
 ---
 
-## Project Structure
+# Project Structure
 
-```
+```text
 IUT-HACKATHON/
 │
-├── backend/      # Express + Socket.IO + Simulator + Gemini API
-├── bot/          # Discord Bot
-├── dashboard/    # React + Tailwind Dashboard
+├── backend/
+│   ├── simulator/
+│   ├── llm.js
+│   ├── index.js
+│   └── ...
+│
+├── bot/
+│   ├── api/
+│   ├── socket.js
+│   ├── index.js
+│   └── ...
+│
+├── dashboard/
+│   ├── src/
+│   ├── public/
+│   └── ...
+│
 └── README.md
 ```
 
 ---
 
-## Tech Stack
+# Tech Stack
 
-### Backend
+## Backend
+
 - Node.js
 - Express.js
 - Socket.IO
 - Google Gemini API
 
-### Dashboard
+## Dashboard
+
 - React
 - Tailwind CSS
+- Vite
 - Socket.IO Client
 
-### Bot
+## Discord Bot
+
 - Discord.js
 - Axios
 - Socket.IO Client
 
 ---
 
-# Setup
+# Installation
 
 Clone the repository.
 
-Then install dependencies for **each project**.
+---
 
 ## Backend
 
 ```bash
 cd backend
 npm install
+```
+
+Create a `.env` file inside **backend/**
+
+```env
+PORT=3000
+
+GEMINI_API_KEY=YOUR_GEMINI_API_KEY
 ```
 
 ---
@@ -78,6 +105,16 @@ cd bot
 npm install
 ```
 
+Create a `.env` file inside **bot/**
+
+```env
+DISCORD_TOKEN=YOUR_DISCORD_BOT_TOKEN
+
+BACKEND_URL=http://localhost:3000
+
+ALERT_CHANNEL_ID=YOUR_DISCORD_CHANNEL_ID
+```
+
 ---
 
 ## Dashboard
@@ -85,6 +122,12 @@ npm install
 ```bash
 cd dashboard
 npm install
+```
+
+Create a `.env` file inside **dashboard/**
+
+```env
+VITE_BACKEND_URL=http://localhost:3000
 ```
 
 ---
@@ -95,63 +138,138 @@ Open **three terminals**.
 
 ---
 
-### Terminal 1
+## Terminal 1
 
 ```bash
 cd backend
 npm run dev
 ```
 
+Starts:
+
+- Office Simulator
+- REST API
+- Socket.IO Server
+
 ---
 
-### Terminal 2
+## Terminal 2
 
 ```bash
 cd bot
 npm run dev
 ```
 
+Starts:
+
+- Discord Bot
+- Socket.IO Client
+
 ---
 
-### Terminal 3
+## Terminal 3
 
 ```bash
 cd dashboard
 npm run dev
 ```
 
----
+Starts:
 
-The system will now be running.
-
-- Backend API + Socket.IO server
-- Discord Bot
 - React Dashboard
 
 ---
 
-# Architecture
+# System Architecture
 
-The system consists of four major components:
+The application consists of four major components.
 
-- **Simulator**
-  - Simulates office rooms, devices, and a virtual office clock.
-  - Emits state updates and after-hours alerts.
+### Office Simulator
 
-- **Backend**
-  - Hosts the REST API.
-  - Streams real-time updates through Socket.IO.
-  - Acts as the communication hub between all components.
+Runs a virtual office environment.
 
-- **Dashboard**
-  - Displays live office state.
-  - Shows room-wise power consumption.
-  - Displays after-hours alerts.
+Responsibilities:
 
-- **Discord Bot**
-  - Responds to user commands.
-  - Uses Gemini to generate natural-language summaries.
-  - Receives proactive alert notifications from the backend.
+- Simulates rooms
+- Simulates devices
+- Simulates office clock
+- Randomly changes device states
+- Generates alerts after office hours
+
+---
+
+### Backend
+
+Acts as the central communication hub.
+
+Responsibilities:
+
+- REST API
+- Socket.IO server
+- LLM integration
+- Simulator management
+- Broadcasts simulator updates
+- Broadcasts alert events
+
+---
+
+### Dashboard
+
+Displays office state in real time.
+
+Features:
+
+- Live room status
+- Room-wise energy consumption
+- Device status
+- Simulated office clock
+- After-hours alert panel
+
+---
+
+### Discord Bot
+
+Allows users to monitor the office directly from Discord.
+
+Features:
+
+- Office status summaries
+- Power usage
+- Room information
+- Natural language responses
+- Automatic after-hours notifications
+
+---
+
+# Communication
+
+## Dashboard
+
+Uses:
+
+- REST (initial requests)
+- Socket.IO (live updates)
+
+Receives:
+
+```
+office:update
+```
+
+---
+
+## Discord Bot
+
+Uses:
+
+- REST API for commands
+- Socket.IO for proactive alerts
+
+Receives:
+
+```
+after-hours-alert
+```
 
 ---
 
@@ -173,49 +291,79 @@ The system consists of four major components:
 
 ---
 
-# API Endpoints
+# REST API
+
+## Office
 
 ```
 GET /api/state
+```
 
+Returns current office state.
+
+---
+
+```
 GET /api/usage
+```
 
+Returns overall office power usage.
+
+---
+
+```
 GET /api/alerts
+```
 
+Returns active alerts.
+
+---
+
+## Discord Endpoints
+
+```
 GET /api/discord/status
+```
 
+---
+
+```
 GET /api/discord/usage
+```
 
+---
+
+```
 GET /api/discord/room/:room
 ```
 
 ---
 
-# Real-Time Events
+# Socket.IO Events
 
-### Dashboard
+## Backend → Dashboard
 
 ```
 office:update
 ```
 
-Receives simulator state updates in real time.
+Broadcasts simulator state whenever the office changes.
 
 ---
 
-### Discord Bot
+## Backend → Discord Bot
 
 ```
 after-hours-alert
 ```
 
-Receives proactive alerts every simulated hour after office hours while devices remain active.
+Sent periodically after office hours while devices remain active.
 
 ---
 
 # Office Simulation
 
-The simulator models:
+The simulator models three rooms.
 
 - Drawing Room
 - Work Room 1
@@ -226,11 +374,21 @@ Each room contains:
 - Ceiling Fans
 - Lights
 
-The simulator advances using a virtual office clock and randomly toggles device states to emulate real-world activity.
+Each device has:
+
+- Name
+- Room
+- Status
+- Wattage
+- Last changed time
 
 ---
 
-# Office Hours
+# Simulated Clock
+
+The simulator uses a virtual office clock.
+
+Office Hours:
 
 ```
 09:00 AM
@@ -239,7 +397,18 @@ The simulator advances using a virtual office clock and randomly toggles device 
 05:00 PM
 ```
 
-Devices still running after office hours automatically generate alerts.
+The clock advances automatically every simulator tick.
+
+---
+
+# Alerts
+
+After **5:00 PM**, any device that remains ON generates an alert.
+
+Alerts are:
+
+- Displayed on the dashboard
+- Sent automatically to Discord
 
 ---
 
