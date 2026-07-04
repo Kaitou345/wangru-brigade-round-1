@@ -1,11 +1,15 @@
-import {
+const {
     Client,
     GatewayIntentBits
-} from "discord.js";
+} = require("discord.js");
 
-import dotenv from "dotenv";
+const {
+    getStatus,
+    getUsage,
+    getRoom
+} = require("./api/api");
 
-dotenv.config();
+require("dotenv").config();
 
 const client = new Client({
     intents: [
@@ -15,75 +19,86 @@ const client = new Client({
     ]
 });
 
-
-client.once("ready", () => {
-    console.log(`Logged in as ${client.user?.tag}`);
+client.once("clientReady", () => {
+    console.log(`Logged in as ${client.user.tag}`);
 });
-
 
 client.on("messageCreate", async (message) => {
 
     if (message.author.bot) return;
     if (!message.content.startsWith("!")) return;
 
-    const args = message.content.slice(1).split(" ");
+    const args = message.content.trim().split(/\s+/);
+    const command = args.shift().slice(1).toLowerCase();
 
-    const command = args.shift().toLowerCase();
+    try {
 
-    // handle individual !commands 
+        switch (command) {
 
-    switch (command) {
+            case "ping": {
+                return message.reply("🏓 Pong!");
+            }
 
-        case "ping":
-            return message.reply("🏓 Pong!");
+            case "help": {
+                return message.reply(`
+**Available Commands**
 
-        case "help":
-            return message.reply(`
 !status
 !usage
 !room drawing
 !room work1
 !room work2
-            `);
+                `);
+            }
 
-        case "status": {
+            case "status": {
 
-            const s = backend.status();
+                const loading = await message.reply("🔍 Checking office status...");
 
-            return message.reply(`
-Drawing Room: ${s.drawing.fans} fan(s) ON, ${s.drawing.lights} light(s) ON
-Work Room 1: ${s.work1.fans} fan(s) ON, ${s.work1.lights} light(s) ON
-Work Room 2: ${s.work2.fans} fan(s) ON, ${s.work2.lights} light(s) ON
-            `);
+                const response = await getStatus();
 
+                return loading.edit(response);
+            }
+
+            case "usage": {
+
+                const loading = await message.reply("⚡ Calculating power usage...");
+
+                const response = await getUsage();
+
+                return loading.edit(response);
+            }
+
+            case "room": {
+
+                const roomName = args[0];
+
+                if (!roomName) {
+                    return message.reply(
+                        "Usage: `!room drawing`, `!room work1`, or `!room work2`"
+                    );
+                }
+
+                const loading = await message.reply(`🏢 Checking ${roomName}...`);
+
+                const response = await getRoom(roomName);
+
+                return loading.edit(response);
+            }
+
+            default:
+                return message.reply(
+                    "Unknown command. Type `!help` to see available commands."
+                );
         }
 
-        case "usage": {
+    } catch (err) {
 
-            const u = backend.usage();
+        console.error(err);
 
-            return message.reply(
-                `⚡ ${u.power}W\n📈 ${u.today} kWh today`
-            );
-
-        }
-
-        case "room": {
-
-            const room = backend.room(args[0]);
-
-            if (!room)
-                return message.reply("Unknown room.");
-
-            return message.reply(
-                `Fans ON: ${room.fans}\nLights ON: ${room.lights}`
-            );
-
-        }
-
-        default:
-            return message.reply("Unknown command.");
-
+        return message.reply(
+            "❌ An unexpected error occurred."
+        );
     }
 
 });

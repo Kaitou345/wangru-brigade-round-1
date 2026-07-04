@@ -1,7 +1,11 @@
+const DRAWING = "Drawing Room"
+const ROOM_1 = "Work Room 1"
+const ROOM_2 = "Work Room 2"
+
 const ROOMS = [
-    "Drawing Room",
-    "Work Room 1",
-    "Work Room 2"
+    DRAWING,
+    ROOM_1,
+    ROOM_2
 ];
 
 const DEVICE_TEMPLATE = [
@@ -19,5 +23,8 @@ const DEVICE_TEMPLATE = [
 
 module.exports = {
     ROOMS,
-    DEVICE_TEMPLATE
+    DEVICE_TEMPLATE, 
+    DRAWING,
+    ROOM_1,
+    ROOM_2
 };
