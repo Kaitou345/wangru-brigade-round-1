@@ -6,7 +6,7 @@ const BASE_URL = process.env.BACKEND_URL;
 
 async function getStatus() {
     try {
-        const response = await axios.get(`${BASE_URL}/discord/status`);
+        const response = await axios.get(`${BASE_URL}/api/discord/status`);
         return response.data.answer;
     } catch (err) {
         console.error("GET /discord/status:", err.message);
@@ -16,7 +16,7 @@ async function getStatus() {
 }
 async function getUsage() {
     try {
-        const response = await axios.get(`${BASE_URL}/discord/usage`);
+        const response = await axios.get(`${BASE_URL}/api/discord/usage`);
         return response.data.answer;
     } catch (err) {
         console.error("GET /discord/usage:", err.message);
@@ -27,7 +27,7 @@ async function getUsage() {
 
 async function getRoom(roomName) {
     try {
-        const response = await axios.get(`${BASE_URL}/discord/room/${roomName}`);
+        const response = await axios.get(`${BASE_URL}/api/discord/room/${roomName}`);
         return response.data.answer;
 
     } catch (err) {

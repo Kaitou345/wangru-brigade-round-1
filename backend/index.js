@@ -31,11 +31,21 @@ app.use(express.json());
 
 /* -----  Simulator  ----- */
 
+simulator.start();
 simulator.on("update", (state) => {
     io.emit("office:update", state);
 });
+simulator.on("after-hours-alert", ({ hour, alerts }) => {
 
-simulator.start();
+    io.emit("after-hours-alert", {
+
+        hour,
+
+        alerts
+
+    });
+
+});
 
 /* ---- Socket.IO ----- */
 

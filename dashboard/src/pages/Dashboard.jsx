@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import socket from "../api/socket";
-
+import AlertPanel from "../components/AlertPanel";
 import Header from "../components/Header";
 import StatCards from "../components/StatCards";
 import RoomGrid from "../components/RoomGrid";
@@ -46,14 +46,16 @@ export default function Dashboard() {
         <div className="min-h-screen bg-slate-100">
 
             <Header />
-
             <div className="mx-auto max-w-7xl p-8">
 
                 <StatCards state={state} />
-
+                <AlertPanel
+                    alerts={state.alerts}
+                    timestamp={state.timestamp}
+                />
                 <RoomGrid state={state} />
-
             </div>
+
 
         </div>
 

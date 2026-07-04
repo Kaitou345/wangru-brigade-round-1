@@ -2,7 +2,7 @@ const EventEmitter = require("events");
 const state = require("./state");
 const { ROOMS, DEVICE_TEMPLATE } = require("./constants");
 
-const INTERVAL_MS = 10_000;
+const INTERVAL_MS = 1000;
 const PER_TICK_MIN = 30;
 
 const OFFICE_START = 9;
@@ -19,7 +19,7 @@ class Simulator extends EventEmitter {
         // Simulation starts at 9:00 AM
         this.time = new Date();
         this.time.setHours(OFFICE_START, 0, 0, 0);
-
+        this.lastAlertHour = null;
     }
 
     start(interval = INTERVAL_MS) {
@@ -112,8 +112,33 @@ class Simulator extends EventEmitter {
 
         }
 
-        this.emit("update", this.getState());
+        const hour = this.time.getHours();
 
+        const afterHours =
+            hour < OFFICE_START || hour >= OFFICE_END;
+
+        const alerts = this.getAlerts();
+
+        if (
+            afterHours &&
+            alerts.length > 0 &&
+            this.lastAlertHour !== hour
+        ) {
+
+            this.lastAlertHour = hour;
+
+            this.emit("after-hours-alert", {
+                hour,
+                alerts
+            });
+
+        }
+
+        if (!afterHours || alerts.length === 0) {
+            this.lastAlertHour = null;
+        }
+
+        this.emit("update", this.getState());
     }
 
     #getRoomSummary() {
@@ -212,11 +237,46 @@ class Simulator extends EventEmitter {
 
     getAlerts() {
 
-        // We'll implement this next.
-        return [];
+        const alerts = [];
+
+        const hour = this.time.getHours();
+
+        const afterHours =
+            hour < OFFICE_START || hour >= OFFICE_END;
+
+        if (!afterHours) {
+            return alerts;
+        }
+
+        const activeDevices = state.devices.filter(
+            device => device.status
+        );
+
+        for (const device of activeDevices) {
+
+            alerts.push({
+
+                id: `${device.id}-after-hours`,
+
+                type: "after_hours",
+
+                severity: "warning",
+
+                room: device.room,
+
+                device: device.name,
+
+                message: `${device.name} in ${device.room} is still ON after office hours.`,
+
+                timestamp: this.time.toISOString()
+
+            });
+
+        }
+
+        return alerts;
 
     }
-
 }
 
 module.exports = new Simulator();
